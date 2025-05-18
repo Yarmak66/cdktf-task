@@ -25,11 +25,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Load env file variables
+      - name: Load .env.${{ inputs.environment }}
+        shell: bash
         run: |
           set -a
-          source .env.${{ inputs.environment }}
+          . .env.${{ inputs.environment }}
           set +a
+          echo "ENV=${{ inputs.environment }}" >> $GITHUB_ENV
           echo "CDKTF_BACKEND_BUCKET=$CDKTF_BACKEND_BUCKET" >> $GITHUB_ENV
           echo "CDKTF_BACKEND_KEY=$CDKTF_BACKEND_KEY" >> $GITHUB_ENV
           echo "CDKTF_BACKEND_LOCK_TABLE=$CDKTF_BACKEND_LOCK_TABLE" >> $GITHUB_ENV
@@ -46,13 +48,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
       - name: Install CDKTF & dependencies
         run: |
           npm install --global cdktf-cli
           pip install -r requirements.txt
+          cdktf init --local --template=python --project-name=my-cdktf-app --project-description="CDKTF Project"
+          cdktf get
 
-      - name: Generate Terraform provider bindings
-        run: make get
+      - name: Debug Python path and imports
+        run: |
+          ls -la
+          ls -la imports
+          python -c "import sys; print(sys.path)"
 
-      - name: Run destroy (no confirmation)
-        run: make destroy
+      - name: Destroy infrastructure (no confirmation)
+        run: cdktf destroy --auto-approve

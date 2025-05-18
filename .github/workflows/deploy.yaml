@@ -30,6 +30,7 @@ jobs:
           set -a
           source .env.${{ inputs.environment }}
           set +a
+          echo "ENV=${{ inputs.environment }}" >> $GITHUB_ENV
           echo "CDKTF_BACKEND_BUCKET=$CDKTF_BACKEND_BUCKET" >> $GITHUB_ENV
           echo "CDKTF_BACKEND_KEY=$CDKTF_BACKEND_KEY" >> $GITHUB_ENV
           echo "CDKTF_BACKEND_LOCK_TABLE=$CDKTF_BACKEND_LOCK_TABLE" >> $GITHUB_ENV
@@ -96,6 +97,11 @@ jobs:
         run: |
           npm install --global cdktf-cli
           pip install -r requirements.txt
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6    
 
       - name: Generate Terraform provider bindings
         run: make get
