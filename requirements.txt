@@ -1,0 +1,4 @@
+cdktf
+constructs>=10.0.0
+aws-cdk.aws-s3
+aws-cdk.aws-ec2

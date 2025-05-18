@@ -1,0 +1,21 @@
+npm install -g cdktf-cli
+pip install -r requirements.txt
+cdktf get
+cdktf synth
+cdktf deploy --backend-config=main.tfbackend.json
+
+
+
+for dev:
+
+make get
+make synth
+make deploy
+make diff
+make destroy
+
+for prod:
+
+make ENV=prod deploy
+make ENV=prod destroy
+make ENV=prod diff

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Terraform/CDKTF
+cdktf.out/
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+.terraform.lock.hcl
+
+# Local logs or temp
+*.log
+*.bak
+*.swp
+.DS_Store
+
+# OS & IDE
+.idea/
+.vscode/
+*.iml
+
+# Node deps (если js bindings или cdktf in ts)
+node_modules/
+
+index.html
