@@ -9,7 +9,8 @@ cdktf.out/
 terraform.tfstate
 terraform.tfstate.*
 .terraform.lock.hcl
-
+.imports/
+.gen/
 # Local logs or temp
 *.log
 *.bak
