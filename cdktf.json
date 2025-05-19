@@ -2,8 +2,7 @@
   "language": "python",
   "app": "python main.py",
   "terraformProviders": [
-    "hashicorp/aws@~>5.0",
-    "hashicorp/null@~>3.0"
+    "hashicorp/aws@~>5.0"
   ],
   "projectId": "56147996-73d8-4f29-8926-507ec9528980"
 }
