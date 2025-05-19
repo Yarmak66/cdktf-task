@@ -16,8 +16,8 @@ env:
   AWS_REGION: eu-north-1
 
 jobs:
-  plan:
-    name: Plan ${{ inputs.environment }}
+  deploy:
+    name: Deploy ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
@@ -25,10 +25,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Load env file variables
+      - name: Load .env.${{ inputs.environment }}
+        shell: bash
         run: |
           set -a
-          source .env.${{ inputs.environment }}
+          . .env.${{ inputs.environment }}
           set +a
           echo "ENV=${{ inputs.environment }}" >> $GITHUB_ENV
           echo "CDKTF_BACKEND_BUCKET=$CDKTF_BACKEND_BUCKET" >> $GITHUB_ENV
@@ -46,65 +47,20 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install CDKTF & Python dependencies
-        run: |
-          npm install --global cdktf-cli
-          pip install -r requirements.txt
-
-      - name: Generate Terraform provider bindings
-        run: make get
-
-      - name: Run synth
-        run: make synth
-
-      - name: Run diff (terraform plan)
-        run: make diff
-
-  deploy:
-    name: Deploy ${{ inputs.environment }}
-    needs: plan
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    if: github.event_name == 'workflow_dispatch'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Load env file variables
-        run: |
-          set -a
-          source .env.${{ inputs.environment }}
-          set +a
-          echo "CDKTF_BACKEND_BUCKET=$CDKTF_BACKEND_BUCKET" >> $GITHUB_ENV
-          echo "CDKTF_BACKEND_KEY=$CDKTF_BACKEND_KEY" >> $GITHUB_ENV
-          echo "CDKTF_BACKEND_LOCK_TABLE=$CDKTF_BACKEND_LOCK_TABLE" >> $GITHUB_ENV
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install CDKTF & Python dependencies
-        run: |
-          npm install --global cdktf-cli
-          pip install -r requirements.txt
-
+          
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.6    
 
-      - name: Generate Terraform provider bindings
-        run: make get
+      - name: Install CDKTF, Python & Providers
+        run: |
+          npm install --global cdktf-cli
+          pip install -r requirements.txt
+          cdktf get
 
-      - name: Run deploy (manual approval)
-        run: make deploy
+      - name: Synthesize & Deploy
+        run: |
+          cdktf synth
+          cdktf diff
+          cdktf deploy --auto-approve

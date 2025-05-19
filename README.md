@@ -15,12 +15,5 @@ This project provisions a static website hosted on Amazon S3 with CloudFront dis
 - Python 3.11
 - Node.js
 - CDKTF CLI (`npm install -g cdktf-cli`)
+- Terraform
 - AWS credentials (set via GitHub Secrets or local environment)
-
-## Quick Start
-
-```bash
-make get
-make synth
-make diff
-make deploy
